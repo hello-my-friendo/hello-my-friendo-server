@@ -10,6 +10,7 @@ class CreateWantResponse {
       want.userId,
       want.body,
       want.start,
+      want.location,
       want.end
     );
   }

@@ -14,6 +14,10 @@ describe('create want v1', () => {
       body: faker.lorem.sentence(),
       start: faker.date.soon(),
       end: faker.date.future(),
+      location: {
+        lat: Number.parseFloat(faker.address.latitude()),
+        lng: Number.parseFloat(faker.address.longitude()),
+      },
     };
 
     const response = await request(app)
@@ -29,6 +33,7 @@ describe('create want v1', () => {
         body: requestBody.body,
         start: requestBody.start.toISOString(),
         end: requestBody.end.toISOString(),
+        location: requestBody.location,
       },
     });
   });

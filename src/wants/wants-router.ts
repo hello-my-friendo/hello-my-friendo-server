@@ -17,6 +17,10 @@ class WantsRouter {
           .keys({
             body: Joi.string().required(),
             start: Joi.date().iso().required(),
+            location: Joi.object().keys({
+              lat: Joi.number().min(-90).max(90).required(),
+              lng: Joi.number().min(-180).max(180).required(),
+            }),
             end: Joi.date().iso(),
           })
           .required(),
@@ -25,7 +29,7 @@ class WantsRouter {
         try {
           const userId = req.auth?.payload.sub;
 
-          const {body, start, end} = req.body;
+          const {body, start, location, end} = req.body;
 
           console.log('create Want request received', {userId, ...req.body});
 
@@ -33,6 +37,7 @@ class WantsRouter {
             userId!,
             body,
             start,
+            location,
             end
           );
 

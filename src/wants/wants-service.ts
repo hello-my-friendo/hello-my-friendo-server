@@ -3,6 +3,8 @@ import {
   FieldValue,
   FirestoreDataConverter,
 } from '@google-cloud/firestore';
+import * as geofire from 'geofire-common';
+import {Location} from '../common/models';
 import {NotImplementedError} from '../errors';
 import {Want} from './models';
 
@@ -17,6 +19,7 @@ const wantConverter: FirestoreDataConverter<Want> = {
       data.userId,
       data.body,
       data.start.toDate(),
+      new Location(data.location.lat, data.location.lng),
       snapshot.createTime.toDate(),
       snapshot.updateTime.toDate(),
       end
@@ -37,15 +40,23 @@ class WantsService {
     userId: string,
     body: string,
     start: Date,
+    location: Location,
     end?: Date
   ): Promise<Want> {
     const wantsCollection = this.firestore.collection(this.wantsCollectionName);
+
+    const geohash = geofire.geohashForLocation([location.lat, location.lng]);
 
     const wantData = {
       userId,
       body,
       start,
       end,
+      location: {
+        lat: location.lat,
+        lng: location.lng,
+        geohash,
+      },
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     };
