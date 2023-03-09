@@ -1,7 +1,18 @@
+import {Want} from '../models';
 import {WantDto} from './want-dto';
 
 class CreateWantResponse {
-  constructor(readonly want: WantDto) {}
+  readonly want;
+
+  constructor(want: Want) {
+    this.want = new WantDto(
+      want.id,
+      want.userId,
+      want.body,
+      want.start,
+      want.end
+    );
+  }
 }
 
 export {CreateWantResponse};

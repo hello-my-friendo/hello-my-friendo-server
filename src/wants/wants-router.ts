@@ -11,7 +11,7 @@ class WantsRouter {
     const router = express.Router();
 
     router.post(
-      '/wants',
+      '/v1/wants',
       celebrate({
         [Segments.BODY]: Joi.object()
           .keys({
