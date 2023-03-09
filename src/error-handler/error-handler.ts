@@ -1,11 +1,13 @@
 import * as util from 'util';
 import {Response} from 'express';
+import {UnauthorizedError} from 'express-oauth2-jwt-bearer';
 import {isCelebrateError} from 'celebrate';
 import {StatusCodes} from 'http-status-codes';
 
 enum ErrorResponseCode {
   generalException = 'generalException',
   invalidRequest = 'invalidRequest',
+  unauthorized = 'unauthorized',
 }
 
 class ErrorResponse {
@@ -33,6 +35,14 @@ class ErrorHandler {
         .status(StatusCodes.BAD_REQUEST)
         .json(
           new ErrorResponse(ErrorResponseCode.invalidRequest, errorMessage)
+        );
+    }
+
+    if (error instanceof UnauthorizedError) {
+      return res
+        .status(StatusCodes.UNAUTHORIZED)
+        .json(
+          new ErrorResponse(ErrorResponseCode.unauthorized, 'unauthorized')
         );
     }
 
