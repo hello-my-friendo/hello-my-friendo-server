@@ -4,7 +4,11 @@ import {config} from '../../src/config';
 class User {
   private token?: string = undefined;
 
-  constructor(readonly username: string, readonly password: string) {}
+  constructor(
+    readonly email: string,
+    readonly password: string,
+    readonly userId: string
+  ) {}
 
   async login(): Promise<string> {
     if (this.token) {
@@ -17,7 +21,7 @@ class User {
       headers: {'content-type': 'application/x-www-form-urlencoded'},
       data: new URLSearchParams({
         grant_type: 'password',
-        username: this.username,
+        username: this.email,
         password: this.password,
         audience: config.auth0.audience,
         client_id: config.auth0.clientId,
@@ -35,6 +39,25 @@ class User {
   }
 }
 
-const user1 = new User('regular-user-1@example.com', 'Pass123@');
+const marcus = new User(
+  'marcus@example.com',
+  'Pass123@',
+  'auth0|6409669dfbe4cb353d1dfb90'
+);
+const pricilla = new User(
+  'pricilla@example.com',
+  'Pass123@',
+  'auth0|640ab25081db919440fa329d'
+);
+const carlo = new User(
+  'carlo@example.com',
+  'Pass123@',
+  'auth0|640ab27021920f8d342b3115'
+);
+const edlaine = new User(
+  'edlaine@example.com',
+  'Pass123@',
+  'auth0|640ab28f136d6c9ffd630cb8'
+);
 
-export {user1};
+export {marcus, pricilla, carlo, edlaine};

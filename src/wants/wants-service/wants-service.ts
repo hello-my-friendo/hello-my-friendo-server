@@ -4,25 +4,29 @@ import {
   FirestoreDataConverter,
 } from '@google-cloud/firestore';
 import * as geofire from 'geofire-common';
-import {Location} from '../common/models';
-import {NotImplementedError} from '../errors';
+import {NotImplementedError} from '../../errors';
+import {CreateWantOptions} from './interfaces';
 import {Want} from './models';
 
 const wantConverter: FirestoreDataConverter<Want> = {
   fromFirestore: function (snapshot) {
     const data = snapshot.data();
 
-    const end = data.end?.toDate();
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const {geohash, ...where} = data.where;
 
     return new Want(
       snapshot.id,
-      data.userId,
-      data.body,
-      data.start.toDate(),
-      new Location(data.location.lat, data.location.lng),
-      snapshot.createTime.toDate(),
-      snapshot.updateTime.toDate(),
-      end
+      data.creatorId,
+      data.admins,
+      data.members,
+      data.title,
+      data.visibility,
+      data.openToOffers,
+      data.createdAt.toDate(),
+      data.updatedAt.toDate(),
+      data.when.toDate(),
+      where
     );
   },
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -36,30 +40,32 @@ class WantsService {
 
   constructor(private readonly firestore: Firestore) {}
 
-  async createWant(
-    userId: string,
-    body: string,
-    start: Date,
-    location: Location,
-    end?: Date
-  ): Promise<Want> {
+  async createWant(createWantOptions: CreateWantOptions): Promise<Want> {
     const wantsCollection = this.firestore.collection(this.wantsCollectionName);
 
-    const geohash = geofire.geohashForLocation([location.lat, location.lng]);
-
-    const wantData = {
-      userId,
-      body,
-      start,
-      end,
-      location: {
-        lat: location.lat,
-        lng: location.lng,
-        geohash,
-      },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const wantData: any = {
+      creatorId: createWantOptions.creatorId,
+      admins: [createWantOptions.creatorId],
+      members: [createWantOptions.creatorId],
+      title: createWantOptions.title,
+      visibility: createWantOptions.visibility,
+      openToOffers: createWantOptions.openToOffers,
+      when: createWantOptions.when,
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     };
+
+    if (createWantOptions.where) {
+      const geohash = geofire.geohashForLocation([
+        createWantOptions.where.location.lat,
+        createWantOptions.where.location.lng,
+      ]);
+      wantData.where = {
+        ...createWantOptions.where,
+        geohash,
+      };
+    }
 
     const wantDocRef = await wantsCollection.add(wantData);
 
