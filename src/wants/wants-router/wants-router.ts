@@ -2,7 +2,6 @@ import * as express from 'express';
 import {celebrate, Joi, Segments} from 'celebrate';
 import {StatusCodes} from 'http-status-codes';
 import {WantsService} from '../wants-service';
-import {CreateWantResponse} from './dtos';
 
 class WantsRouter {
   constructor(private readonly wantsService: WantsService) {}
@@ -55,11 +54,7 @@ class WantsRouter {
 
           console.log('Want created!', want);
 
-          const responseBody: CreateWantResponse = {
-            want,
-          };
-
-          return res.status(StatusCodes.CREATED).json(responseBody);
+          return res.status(StatusCodes.CREATED).json(want);
         } catch (err) {
           return next(err);
         }

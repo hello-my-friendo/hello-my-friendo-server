@@ -63,19 +63,17 @@ describe('create want v1', () => {
 
       expect(response.statusCode).toBe(201);
       expect(response.body).toStrictEqual({
-        want: {
-          id: expect.toBeString(),
-          creatorId: users.marcus.userId,
-          admins: [users.marcus.userId],
-          members: [users.marcus.userId],
-          title: requestBody.title,
-          visibility: requestBody.visibility,
-          openToOffers: requestBody.openToOffers,
-          when: requestBody.when.toISOString(),
-          where: requestBody.where,
-          createdAt: expect.toBeDateString(),
-          updatedAt: expect.toBeDateString(),
-        },
+        id: expect.toBeString(),
+        creatorId: users.marcus.userId,
+        admins: [users.marcus.userId],
+        members: [users.marcus.userId],
+        title: requestBody.title,
+        visibility: requestBody.visibility,
+        openToOffers: requestBody.openToOffers,
+        when: requestBody.when.toISOString(),
+        where: requestBody.where,
+        createdAt: expect.toBeDateString(),
+        updatedAt: expect.toBeDateString(),
       });
     }
   );
