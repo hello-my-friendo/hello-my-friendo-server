@@ -2,6 +2,7 @@ import * as express from 'express';
 import {celebrate, Joi, Segments} from 'celebrate';
 import {StatusCodes} from 'http-status-codes';
 import {WantsService} from '../wants-service';
+import {jwtCheck} from '../../middleware/jwt-check';
 
 class WantsRouter {
   constructor(private readonly wantsService: WantsService) {}
@@ -35,13 +36,14 @@ class WantsRouter {
           })
           .required(),
       }),
+      jwtCheck,
       async (req, res, next) => {
         try {
           const creatorId = req.auth?.payload.sub;
 
-          const {title, visibility, openToOffers, when, where} = req.body;
-
           console.log('create Want request received', {creatorId, ...req.body});
+
+          const {title, visibility, openToOffers, when, where} = req.body;
 
           const want = await this.wantsService.createWant({
             creatorId: creatorId!,

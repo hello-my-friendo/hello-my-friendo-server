@@ -3,10 +3,13 @@ import {Response} from 'express';
 import {UnauthorizedError} from 'express-oauth2-jwt-bearer';
 import {isCelebrateError} from 'celebrate';
 import {StatusCodes} from 'http-status-codes';
+import {AlreadyExistsError, NotFoundError} from '../errors';
 
 enum ErrorResponseCode {
+  alreadyExists = 'alreadyExists',
   generalException = 'generalException',
   invalidRequest = 'invalidRequest',
+  notFound = 'notFound',
   unauthorized = 'unauthorized',
 }
 
@@ -32,10 +35,24 @@ class ErrorHandler {
       const errors = Array.from(error.details, ([, value]) => value.message);
       const errorMessage = errors.join('\n');
       return res
-        .status(StatusCodes.BAD_REQUEST)
+        .status(StatusCodes.NOT_FOUND)
         .json(
           new ErrorResponse(ErrorResponseCode.invalidRequest, errorMessage)
         );
+    }
+
+    if (error instanceof AlreadyExistsError) {
+      return res
+        .status(StatusCodes.CONFLICT)
+        .json(
+          new ErrorResponse(ErrorResponseCode.alreadyExists, error.message)
+        );
+    }
+
+    if (error instanceof NotFoundError) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json(new ErrorResponse(ErrorResponseCode.notFound, error.message));
     }
 
     if (error instanceof UnauthorizedError) {

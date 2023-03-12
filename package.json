@@ -21,10 +21,11 @@
     "fix": "gts fix",
     "test": "jest --runInBand --detectOpenHandles",
     "pretest": "npm run up:firestore",
-    "posttest": "npm run compile",
+    "posttest": "npm run compile && npm run down",
     "start": "nodemon --watch 'src/**/*.ts' --exec \"ts-node\" -r dotenv-expand/config src/index.ts",
     "prestart": "npm run up:firestore",
-    "up:firestore": "docker compose up -d firestore_emulator --wait"
+    "up:firestore": "docker compose up -d firestore_emulator --wait",
+    "down": "docker compose down"
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",

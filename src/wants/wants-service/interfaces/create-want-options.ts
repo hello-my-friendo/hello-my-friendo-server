@@ -1,4 +1,4 @@
-import {Place, Visibility} from '../models';
+import {Place, Visibility} from '../../models';
 
 interface CreateWantOptions {
   creatorId: string;
