@@ -13,8 +13,17 @@ const wantConverter: FirestoreDataConverter<Want> = {
   fromFirestore: function (snapshot) {
     const data = snapshot.data();
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const {geohash, ...where} = data.where;
+    let when;
+    if (data.when) {
+      when = data.when.toDate();
+    }
+
+    let where;
+    if (data.where) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const {geohash, ...dataWhere} = data.where;
+      where = dataWhere;
+    }
 
     return {
       id: snapshot.id,
@@ -26,7 +35,7 @@ const wantConverter: FirestoreDataConverter<Want> = {
       openToOffers: data.openToOffers,
       createdAt: data.createdAt.toDate(),
       updatedAt: data.updatedAt.toDate(),
-      when: data.when.toDate(),
+      when,
       where,
     };
   },
