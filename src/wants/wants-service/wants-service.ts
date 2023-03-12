@@ -48,7 +48,7 @@ class WantsService {
     const creator = await this.usersService.getUserById(options.creatorId);
 
     if (!creator) {
-      throw new NotFoundError(`creator ${options.creatorId} not found`);
+      throw new NotFoundError(`Creator ${options.creatorId} not found`);
     }
 
     const wantsCollection = this.firestore.collection(this.wantsCollectionName);

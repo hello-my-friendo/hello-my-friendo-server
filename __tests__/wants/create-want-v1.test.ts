@@ -4,7 +4,7 @@ import {faker} from '@faker-js/faker';
 import {users, usersClient} from '../utils';
 import {app} from '../../src/app';
 
-describe('create want v1', () => {
+describe('create Want v1', () => {
   function makeCreateWantUrl() {
     return '/v1/wants';
   }
