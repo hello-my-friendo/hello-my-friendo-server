@@ -23,7 +23,7 @@ class UsersRouter {
       }),
       async (req, res, next) => {
         try {
-          console.log('create User request received', req.body);
+          console.log('Create User request received', req.body);
 
           const {userId, email, name, picture} = req.body;
 
@@ -50,7 +50,7 @@ class UsersRouter {
         const user = await this.usersService.getUserById(userId!);
 
         if (!user) {
-          throw new NotFoundError(`user ${userId} not found`);
+          throw new NotFoundError(`User ${userId} not found`);
         }
 
         return res.json(user);

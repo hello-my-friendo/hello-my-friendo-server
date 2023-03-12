@@ -1,5 +1,4 @@
 import axios from 'axios';
-import {StatusCodes} from 'http-status-codes';
 import * as request from 'supertest';
 import {faker} from '@faker-js/faker';
 import {app} from '../../../../src/app';
@@ -24,7 +23,7 @@ class UsersClient {
   async createUserAndDecode(createUserRequest: CreateUserRequest) {
     const createUserResponse = await this.createUser(createUserRequest);
 
-    expect(createUserResponse.statusCode).toBe(StatusCodes.CREATED);
+    expect(createUserResponse.statusCode).toBe(201);
 
     const user: User = {
       id: createUserResponse.body['id'],
@@ -82,7 +81,7 @@ class UsersClient {
       this.tokens.get(user.email)!
     );
 
-    if (getCurrentUserResponse.statusCode === StatusCodes.NOT_FOUND) {
+    if (getCurrentUserResponse.statusCode === 404) {
       const createUserRequest: CreateUserRequest = {
         userId: user.id,
         email: user.email,

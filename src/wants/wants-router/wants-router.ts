@@ -41,7 +41,7 @@ class WantsRouter {
         try {
           const creatorId = req.auth?.payload.sub;
 
-          console.log('create Want request received', {creatorId, ...req.body});
+          console.log('Create Want request received', {creatorId, ...req.body});
 
           const {title, visibility, openToOffers, when, where} = req.body;
 
