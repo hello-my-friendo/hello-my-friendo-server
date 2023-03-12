@@ -53,9 +53,9 @@ class UsersClient {
       .set('authorization', `Bearer ${token}`);
   }
 
-  async login(email: string, password: string): Promise<string> {
-    if (this.tokens.has(email)) {
-      return this.tokens.get(email)!;
+  async login(user: User): Promise<string> {
+    if (this.tokens.has(user.email)) {
+      return this.tokens.get(user.email)!;
     }
 
     const options = {
@@ -64,8 +64,8 @@ class UsersClient {
       headers: {'content-type': 'application/x-www-form-urlencoded'},
       data: new URLSearchParams({
         grant_type: 'password',
-        username: email,
-        password: password,
+        username: user.email,
+        password: user.password!,
         audience: config.auth0.audience,
         client_id: config.auth0.testClientId,
         client_secret: config.auth0.testClientSecret,
@@ -76,22 +76,25 @@ class UsersClient {
       data: {access_token},
     } = await axios.request(options);
 
-    this.tokens.set(email, access_token);
+    this.tokens.set(user.email, access_token);
 
     const getCurrentUserResponse = await usersClient.getCurrentUser(
-      this.tokens.get(email)!
+      this.tokens.get(user.email)!
     );
 
     if (getCurrentUserResponse.statusCode === StatusCodes.NOT_FOUND) {
       const createUserRequest: CreateUserRequest = {
-        userId: faker.datatype.uuid(),
-        email,
+        userId: user.id,
+        email: user.email,
+        name: user.name,
+        picture: user.picture,
       };
 
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       await this.createUserAndDecode(createUserRequest);
     }
 
-    return this.tokens.get(email)!;
+    return this.tokens.get(user.email)!;
   }
 }
 

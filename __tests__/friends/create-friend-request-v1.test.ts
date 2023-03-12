@@ -11,10 +11,7 @@ describe('create friend request v1', () => {
   let marcusToken = '';
 
   beforeAll(async () => {
-    marcusToken = await usersClient.login(
-      users.marcus.email,
-      users.marcus.password!
-    );
+    marcusToken = await usersClient.login(users.marcus);
   });
 
   test('should return 201', async () => {
