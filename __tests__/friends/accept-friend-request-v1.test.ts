@@ -1,5 +1,6 @@
 import 'jest-extended';
 import * as request from 'supertest';
+import {faker} from '@faker-js/faker';
 import {users, usersClient, friendsClient} from '../utils';
 import {app} from '../../src/app';
 
@@ -35,6 +36,22 @@ describe('accept Friend Request v1', () => {
       marcusToken,
       users.pricilla.id
     );
+  });
+
+  test('when Friend Request is not found should return 404', async () => {
+    const friendRequestId = faker.datatype.uuid();
+
+    const response = await request(app)
+      .post(makeAcceptFriendRequestUrl(friendRequestId))
+      .set('authorization', `Bearer ${marcusToken}`);
+
+    expect(response.statusCode).toBe(404);
+    expect(response.body).toStrictEqual({
+      error: {
+        code: 'notFound',
+        message: `Friend Request ${friendRequestId} not found`,
+      },
+    });
   });
 
   test('when Friend Request was not sent to user should return 403', async () => {

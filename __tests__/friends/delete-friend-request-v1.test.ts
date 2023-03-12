@@ -33,7 +33,7 @@ describe('delete Friend Request v1', () => {
     expect(response.body).toBeEmpty();
   });
 
-  test('when Friend request not found should return 404', async () => {
+  test('when Friend Request not found should return 404', async () => {
     const friendRequestId = faker.datatype.uuid();
 
     const response = await request(app)

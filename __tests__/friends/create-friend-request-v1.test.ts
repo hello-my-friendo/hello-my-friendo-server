@@ -39,6 +39,23 @@ describe('create Friend Request v1', () => {
     });
   });
 
+  test('when to is not set should return 400', async () => {
+    const requestBody = {};
+
+    const response = await request(app)
+      .post(makeCreateFriendRequestUrl())
+      .set('authorization', `Bearer ${marcusToken}`)
+      .send(requestBody);
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body).toStrictEqual({
+      error: {
+        code: 'invalidRequest',
+        message: '"to" is required',
+      },
+    });
+  });
+
   test('when User is not found should return 404', async () => {
     const requestBody = {
       to: faker.datatype.uuid(),
