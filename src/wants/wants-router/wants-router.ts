@@ -2,7 +2,7 @@ import * as express from 'express';
 import {celebrate, Joi, Segments} from 'celebrate';
 import {StatusCodes} from 'http-status-codes';
 import {WantsService} from '../wants-service';
-import {CreateWantResponse} from './dtos';
+import {jwtCheck} from '../../middleware/jwt-check';
 
 class WantsRouter {
   constructor(private readonly wantsService: WantsService) {}
@@ -36,13 +36,14 @@ class WantsRouter {
           })
           .required(),
       }),
+      jwtCheck,
       async (req, res, next) => {
         try {
           const creatorId = req.auth?.payload.sub;
 
-          const {title, visibility, openToOffers, when, where} = req.body;
-
           console.log('create Want request received', {creatorId, ...req.body});
+
+          const {title, visibility, openToOffers, when, where} = req.body;
 
           const want = await this.wantsService.createWant({
             creatorId: creatorId!,
@@ -55,11 +56,7 @@ class WantsRouter {
 
           console.log('Want created!', want);
 
-          const responseBody: CreateWantResponse = {
-            want,
-          };
-
-          return res.status(StatusCodes.CREATED).json(responseBody);
+          return res.status(StatusCodes.CREATED).json(want);
         } catch (err) {
           return next(err);
         }

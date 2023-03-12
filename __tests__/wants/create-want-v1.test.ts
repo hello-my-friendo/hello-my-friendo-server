@@ -1,18 +1,21 @@
 import 'jest-extended';
 import * as request from 'supertest';
 import {faker} from '@faker-js/faker';
-import {users} from '../utils';
+import {users, usersClient} from '../utils';
 import {app} from '../../src/app';
 
 describe('create want v1', () => {
-  let marcusToken = '';
-
   function makeCreateWantUrl() {
     return '/v1/wants';
   }
 
+  let marcusToken = '';
+
   beforeAll(async () => {
-    marcusToken = await users.marcus.login();
+    marcusToken = await usersClient.login(
+      users.marcus.email,
+      users.marcus.password!
+    );
   });
 
   test.each<{
@@ -24,19 +27,11 @@ describe('create want v1', () => {
     {visibility: 'friends', openToOffers: true},
     {visibility: 'friends', openToOffers: true},
     {
-      visibility: [
-        users.pricilla.userId,
-        users.carlo.userId,
-        users.edlaine.userId,
-      ],
+      visibility: [users.pricilla.id, users.carlo.id, users.edlaine.id],
       openToOffers: true,
     },
     {
-      visibility: [
-        users.pricilla.userId,
-        users.carlo.userId,
-        users.edlaine.userId,
-      ],
+      visibility: [users.pricilla.id, users.carlo.id, users.edlaine.id],
       openToOffers: false,
     },
   ])(
@@ -63,19 +58,17 @@ describe('create want v1', () => {
 
       expect(response.statusCode).toBe(201);
       expect(response.body).toStrictEqual({
-        want: {
-          id: expect.toBeString(),
-          creatorId: users.marcus.userId,
-          admins: [users.marcus.userId],
-          members: [users.marcus.userId],
-          title: requestBody.title,
-          visibility: requestBody.visibility,
-          openToOffers: requestBody.openToOffers,
-          when: requestBody.when.toISOString(),
-          where: requestBody.where,
-          createdAt: expect.toBeDateString(),
-          updatedAt: expect.toBeDateString(),
-        },
+        id: expect.toBeString(),
+        creatorId: users.marcus.id,
+        admins: [users.marcus.id],
+        members: [users.marcus.id],
+        title: requestBody.title,
+        visibility: requestBody.visibility,
+        openToOffers: requestBody.openToOffers,
+        when: requestBody.when.toISOString(),
+        where: requestBody.where,
+        createdAt: expect.toBeDateString(),
+        updatedAt: expect.toBeDateString(),
       });
     }
   );

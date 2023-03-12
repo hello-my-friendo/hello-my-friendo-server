@@ -1,20 +1,12 @@
 import * as express from 'express';
-import {auth} from 'express-oauth2-jwt-bearer';
 import {Firestore} from '@google-cloud/firestore';
+import {UsersRouter, UsersService} from './users';
+import {FriendsRouter, FriendsService} from './friends';
 import {WantsService, WantsRouter} from './wants';
 import {errorHandler} from './error-handler';
 import {config} from './config';
 
 const app = express();
-
-const jwtCheck = auth({
-  audience: config.auth0.audience,
-  issuerBaseURL: config.auth0.issuerBaseURL,
-  tokenSigningAlg: config.auth0.tokenSigningAlg,
-});
-
-// enforce on all endpoints
-app.use(jwtCheck);
 
 app.use(express.json());
 
@@ -23,10 +15,16 @@ const firestore = new Firestore({
   ignoreUndefinedProperties: true,
 });
 
-const wantsService = new WantsService(firestore);
+const usersService = new UsersService(firestore);
+const friendsService = new FriendsService(firestore, usersService);
+const wantsService = new WantsService(firestore, usersService);
 
+const usersRouter = new UsersRouter(usersService).router;
+const friendsRouter = new FriendsRouter(friendsService).router;
 const wantsRouter = new WantsRouter(wantsService).router;
 
+app.use(usersRouter);
+app.use(friendsRouter);
 app.use(wantsRouter);
 
 app.use(

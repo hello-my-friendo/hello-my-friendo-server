@@ -1,1 +1,1 @@
-export * as users from './users';
+export {usersClient, users} from './users';
