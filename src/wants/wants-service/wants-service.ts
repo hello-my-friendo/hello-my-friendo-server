@@ -4,7 +4,9 @@ import {
   FirestoreDataConverter,
 } from '@google-cloud/firestore';
 import * as geofire from 'geofire-common';
+import * as _ from 'lodash';
 import {UsersService} from '../../users';
+import {FriendsService} from '../../friends';
 import {NotFoundError, NotImplementedError} from '../../errors';
 import {CreateWantOptions} from './interfaces';
 import {Want} from '../models';
@@ -47,10 +49,12 @@ const wantConverter: FirestoreDataConverter<Want> = {
 
 class WantsService {
   private readonly wantsCollectionName = 'wants';
+  private readonly firestoreArrayComparisonClauseLimit = 10;
 
   constructor(
     private readonly firestore: Firestore,
-    private readonly usersService: UsersService
+    private readonly usersService: UsersService,
+    private readonly friendsService: FriendsService
   ) {}
 
   async createWant(options: CreateWantOptions): Promise<Want> {
@@ -103,6 +107,43 @@ class WantsService {
     }
 
     return wantSnapshot.data();
+  }
+
+  async wantsFeed(userId: string) {
+    const wantsFeedChunk = async (userId: string, friendsChunk: string[]) => {
+      const wantsSnapshot = await this.firestore
+        .collection(this.wantsCollectionName)
+        .where('creatorId', 'in', friendsChunk)
+        .withConverter(wantConverter)
+        .get();
+
+      return wantsSnapshot.docs.map(wantSnapshot => wantSnapshot.data());
+    };
+
+    const user = await this.usersService.getUserById(userId);
+
+    if (!user) {
+      throw new NotFoundError(`User ${userId} not found`);
+    }
+
+    const userFriends = await this.friendsService.listFriendsByUserId(userId);
+
+    const chunkedUserFriends = _.chunk(
+      userFriends,
+      this.firestoreArrayComparisonClauseLimit
+    );
+
+    const chunkedWantsFeed = await Promise.all(
+      chunkedUserFriends.map(async userFriendsChunk => {
+        return await wantsFeedChunk(user.id, userFriendsChunk);
+      })
+    );
+
+    const unsortedWantsFeed = chunkedWantsFeed.flat();
+
+    const wantsFeed = _.sortBy(unsortedWantsFeed, want => want.createdAt);
+
+    return wantsFeed;
   }
 }
 

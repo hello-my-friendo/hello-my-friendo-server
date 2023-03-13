@@ -17,7 +17,7 @@ const firestore = new Firestore({
 
 const usersService = new UsersService(firestore);
 const friendsService = new FriendsService(firestore, usersService);
-const wantsService = new WantsService(firestore, usersService);
+const wantsService = new WantsService(firestore, usersService, friendsService);
 
 const usersRouter = new UsersRouter(usersService).router;
 const friendsRouter = new FriendsRouter(friendsService).router;

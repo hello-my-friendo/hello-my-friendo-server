@@ -104,4 +104,23 @@ describe('create Friend Request v1', () => {
       users.pricilla.id
     );
   });
+
+  test('when trying to send a Friends Request to own self should return 422', async () => {
+    const requestBody = {
+      to: users.marcus.id,
+    };
+
+    const response = await request(app)
+      .post(makeCreateFriendRequestUrl())
+      .set('authorization', `Bearer ${marcusToken}`)
+      .send(requestBody);
+
+    expect(response.statusCode).toBe(422);
+    expect(response.body).toStrictEqual({
+      error: {
+        code: 'invalidRequest',
+        message: 'Cannot send a Friend Request to own self',
+      },
+    });
+  });
 });

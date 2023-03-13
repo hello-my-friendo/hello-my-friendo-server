@@ -62,6 +62,14 @@ class ErrorHandler {
         .json(new ErrorResponse(ErrorResponseCode.notFound, error.message));
     }
 
+    if (error instanceof RangeError) {
+      return res
+        .status(StatusCodes.UNPROCESSABLE_ENTITY)
+        .json(
+          new ErrorResponse(ErrorResponseCode.invalidRequest, error.message)
+        );
+    }
+
     if (error instanceof UnauthorizedError) {
       return res
         .status(StatusCodes.UNAUTHORIZED)

@@ -63,6 +63,18 @@ class WantsRouter {
       }
     );
 
+    router.get('/v1/wants/feed', jwtCheck, async (req, res, next) => {
+      try {
+        const userId = req.auth?.payload.sub;
+
+        const wantsFeed = await this.wantsService.wantsFeed(userId!);
+
+        return res.json(wantsFeed);
+      } catch (err) {
+        return next(err);
+      }
+    });
+
     return router;
   }
 }

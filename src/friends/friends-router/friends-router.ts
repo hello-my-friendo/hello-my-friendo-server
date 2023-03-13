@@ -43,6 +43,38 @@ class FriendsRouter {
       }
     );
 
+    router.get('/v1/friend-requests/sent', jwtCheck, async (req, res, next) => {
+      try {
+        const userId = req.auth?.payload.sub;
+
+        const friendRequests = await this.friendsService.listFriendRequests({
+          from: userId!,
+        });
+
+        return res.json(friendRequests);
+      } catch (err) {
+        return next(err);
+      }
+    });
+
+    router.get(
+      '/v1/friend-requests/received',
+      jwtCheck,
+      async (req, res, next) => {
+        try {
+          const userId = req.auth?.payload.sub;
+
+          const friendRequests = await this.friendsService.listFriendRequests({
+            to: userId!,
+          });
+
+          return res.json(friendRequests);
+        } catch (err) {
+          return next(err);
+        }
+      }
+    );
+
     router.delete(
       '/v1/friend-requests/:id',
       jwtCheck,
@@ -139,6 +171,18 @@ class FriendsRouter {
         }
       }
     );
+
+    router.get('/v1/friends', jwtCheck, async (req, res, next) => {
+      try {
+        const userId = req.auth?.payload.sub;
+
+        const friends = await this.friendsService.listFriendsByUserId(userId!);
+
+        res.json(friends);
+      } catch (err) {
+        next(err);
+      }
+    });
 
     router.delete(
       '/v1/friends',

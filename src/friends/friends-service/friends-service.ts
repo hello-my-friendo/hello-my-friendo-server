@@ -10,6 +10,7 @@ import {
   NotImplementedError,
 } from '../../errors';
 import {Follow, FriendRequest} from '../models';
+import {ListFriendRequestsOptions} from './interfaces';
 
 const friendRequestConverter: FirestoreDataConverter<FriendRequest> = {
   fromFirestore: function (snapshot) {
@@ -60,6 +61,10 @@ class FriendsService {
   ) {}
 
   async createFriendRequest(from: string, to: string): Promise<FriendRequest> {
+    if (from === to) {
+      throw new RangeError('Cannot send a Friend Request to own self');
+    }
+
     if (await this.areFriends(from, to)) {
       throw new AlreadyExistsError(
         `Users ${from} and ${to} are already friends`
@@ -137,6 +142,41 @@ class FriendsService {
     return friendRequestSnapshot.docs[0].data();
   }
 
+  async listFriendRequests(options: ListFriendRequestsOptions) {
+    let friendRequestQuery = this.firestore
+      .collection(this.friendRequestsCollectionName)
+      .orderBy('createdAt', 'desc')
+      .withConverter(friendRequestConverter);
+
+    if (options.from) {
+      const fromUser = await this.usersService.getUserById(options.from);
+
+      if (!fromUser) {
+        throw new NotFoundError(`From User ${options.from} not found`);
+      }
+
+      friendRequestQuery = friendRequestQuery.where('from', '==', fromUser.id);
+    }
+
+    if (options.to) {
+      const toUser = await this.usersService.getUserById(options.to);
+
+      if (!toUser) {
+        throw new NotFoundError(`To User ${options.to} not found`);
+      }
+
+      friendRequestQuery = friendRequestQuery.where('to', '==', toUser.id);
+    }
+
+    const friendRequestSnapshot = await friendRequestQuery.get();
+
+    if (friendRequestSnapshot.empty) {
+      return [];
+    }
+
+    return friendRequestSnapshot.docs.map(snapshot => snapshot.data());
+  }
+
   async deleteFriendRequest(friendRequestId: string) {
     const friendRequest = await this.getFriendRequestById(friendRequestId);
 
@@ -210,6 +250,24 @@ class FriendsService {
 
       t.set(user2FollowDocRef, user2FollowData);
     });
+  }
+
+  async listFriendsByUserId(userId: string) {
+    const user = await this.usersService.getUserById(userId);
+
+    if (!user) {
+      throw new NotFoundError(`User ${userId} not found`);
+    }
+
+    const followsSnapshot = await this.firestore
+      .collection(this.followsCollectionName)
+      .where('followerId', '==', user.id)
+      .withConverter(followConverter)
+      .get();
+
+    return followsSnapshot.docs.map(
+      followSnapshot => followSnapshot.data().followedId
+    );
   }
 
   async deleteFriendship(userId1: string, userId2: string) {
